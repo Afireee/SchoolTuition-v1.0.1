@@ -1,0 +1,206 @@
+import java.util.Scanner;
+
+
+/**
+ * This programs displays a command to prompt a user to input his/her id/student number.
+ * With that, it will display the student's information and their tuition fee.
+ * <p>
+ * The program will ask the user if they will pay their tuition fee or not.
+ * If the user is going to pay for his/her tuition, The program prompts the user to input their amount of payment, then the program
+ * will calculate for the new Balance. (If the user cancels the transaction, the program terminates.)
+ *<p>
+ * NOTE: - There are 20 students enrolled in the school.
+ * - The student information displays the following:
+ * <ol>
+ * <li>ID/Student Number</li>
+ * <li>Student's Name</li>
+ * <li>Gender</li>
+ * <li>Birthdate</li>
+ * <li>Citizenship</li>
+ * <li>Religion</li>
+ * <li>Birthplace</li>
+ * <li>Account Type</li>
+ * <li>Tuition Fee</li>
+ * </ol>
+ * <p>
+ * - The amount input by the students for transaction should not be lower than 0.
+ *
+ *  @author Balderas Jr., Peter Bruce P.
+ *  @author Menor, Rovic L.
+ *  @author Palomiano, Argus Altair M.
+ *  @version 1.0.1
+ * 
+ * 1.0.1 - Improvements in the filewriter
+ * 1.0.0 - Initial Release of the Project
+ */
+
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Scanner keyboard = new Scanner(System.in);
+        int[] idNo;
+        String[] lastName, firstName, gender, birthdate, citizenship, religion, birthplace, accountType;
+        double[] tuition;
+
+        int size;
+        int studentNumber;
+
+        int confirmTransaction;
+        double paidAmount, previousBalance, change, remainingBalance;
+
+        size = SchoolInfo.count();
+
+        /**
+         * Instantiating from the value of size.
+         */
+
+        idNo = new int[size];
+        lastName = new String[size];
+        firstName = new String[size];
+        gender = new String[size];
+        birthdate = new String[size];
+        citizenship = new String[size];
+        religion = new String[size];
+        birthplace = new String[size];
+        accountType = new String[size];
+        tuition = new double[size];
+
+        /**
+         * Looking up all the information from the method load in SchoolInfo.java
+         */
+
+        SchoolInfo.load(idNo, lastName, firstName, gender, birthdate, citizenship, religion, birthplace, accountType, tuition);
+
+        /**
+         *  This program prompts the user to input an ID/Student Number from 1-20.
+         */
+
+        System.out.print("Input Id/Student Number (1-20): ");
+        studentNumber = keyboard.nextInt();
+
+        /**
+         * This boolean restricts the user from inputting ID number -1 to negative infinity and 21 to infinity.
+         */
+
+        while (studentNumber < 0 || studentNumber >= 21) {
+            System.out.println("-------------------------------------");
+            System.out.println("Invalid ID/Student Number.");
+            System.out.print("Input ID/Student Number: ");
+            studentNumber = keyboard.nextInt();
+        }
+
+        /**
+         * searches for the ID/student number
+         * and if the id/student number exists the program will display
+         * the ID/student number, name, gender, birthdate, birthplace, citizenship, religion, acc type and balance
+         * of the owner of the ID/student number.
+         */
+
+        for (int i = 0; i < idNo.length; i++) {
+
+            // search for the id/student number
+            if (idNo[i] == studentNumber) {
+
+                System.out.println("-------------------------------------");
+                System.out.println("ID #: " + idNo[i] + "\n" +
+                        "Name: " + lastName[i] + ", " + firstName[i] + "\n" +
+                        "Gender: " + gender[i] + "\n\n" +
+                        "Birthdate: " + birthdate[i] + "\n" +
+                        "Birthplace: " + birthplace[i] + "\n" +
+                        "Citizenship: " + citizenship[i] + "\n" +
+                        "Religion: " + religion[i] + "\n\n" +
+                        "Account Type: " + accountType[i] + "\n" +
+                        "Your balance this finals is: " + "\u20b1" + String.format("%,.2f", tuition[i]) + "\n");
+
+                /**
+                 * Here the program will decide the next action if the student still has balance to pay
+                 * in their tuition fee
+                 * then it proceeds to ask for a payment and can be canceled by typing "0".
+                 */
+
+                if (tuition[i] == 0.0) {
+                    System.out.println("-------------------------------------");
+                    System.out.println("You are fully paid!");
+                }
+
+                /**
+                 * Else, this statement will print and the program will prompt the user if he/she will proceed with the transaction.
+                 */
+
+                else {
+                    System.out.print("Type 1 to proceed with the transaction (Any number to exit student info): ");
+                    confirmTransaction = keyboard.nextInt();
+
+                    if (confirmTransaction == 1) {
+                        System.out.print("Input Amount (Type 0 to cancel transaction): ");
+                        paidAmount = keyboard.nextDouble();
+
+                        while (paidAmount < 0) {
+                            System.out.println("-------------------------------------");
+                            System.out.println("Invalid Transaction.");
+                            System.out.print("Input Amount (Type 0 to cancel transaction): ");
+                            paidAmount = keyboard.nextDouble();
+                        }
+
+                        /**
+                         * The program will display that the user has cancelled his/her transaction.
+                         */
+
+                        if (paidAmount == 0) {
+                            System.out.println("You have cancelled your transaction");
+
+                        }
+
+                        /**
+                         * if the student is fully paid, the user will be notified.
+                         */
+
+                        else if (paidAmount >= tuition[i]) {
+                            previousBalance = tuition[i];
+                            change = paidAmount - tuition[i];
+                            tuition[i] = 0;
+                            remainingBalance = 0;
+
+                            System.out.println("-------------------------------------");
+                            System.out.println("You are now fully paid!" + "\n" +
+                                    "Change: " + "\u20b1" + String.format("%,.2f", change));
+
+                            SchoolInfo.recordTransactions(idNo[i], lastName[i], firstName[i], gender[i], accountType[i], previousBalance, paidAmount, remainingBalance, change);
+
+                        }
+
+                        /**
+                         * if the payment is not enough to pay for the tuition fee
+                         * the program will subtract the payment to the tuition.
+                         * and after the payment, the user will be notified that their payment went through,
+                         * then displays the remaining balance in their account.
+                         */
+
+                        else if (paidAmount < tuition[i]) {
+                            previousBalance = tuition[i];
+                            tuition[i] -= paidAmount;
+                            remainingBalance = tuition[i];
+                            change = 0;
+
+                            System.out.println("-------------------------------------");
+                            System.out.println("Payment Success! \n" +
+                                    "Your remaining balance: " + "\u20b1" + String.format("%,.2f", remainingBalance));
+
+                            SchoolInfo.recordTransactions(idNo[i], lastName[i], firstName[i], gender[i], accountType[i], previousBalance, paidAmount, remainingBalance, change);
+                        }
+                    }
+
+                    /**
+                     * The program will display that the user has exited the student info.
+                     */
+
+                    else {
+                        System.out.println("-------------------------------------");
+                        System.out.println("You have exited the student info");
+                    }
+                }
+            }
+        }
+        SchoolInfo.save(idNo, lastName, firstName, gender, birthdate, citizenship, religion, birthplace, accountType, tuition);
+    }
+}
